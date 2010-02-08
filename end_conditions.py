@@ -1,6 +1,6 @@
 import datetime
 
-__all__ = ['Counter', 'Timer', 'Static']
+__all__ = ['Counter', 'Timer', 'StoppedIncreasing']
 
 class Counter(object):
     """
@@ -31,7 +31,7 @@ class Timer(object):
     def reset(self):
         self.finish_time  = datetime.datetime.now() + self.run_duration
 
-class Static(object):
+class StoppedIncreasing(object):
     """
         End condition to specify a maximum numbe rof generations to go without
     improving the most fit individual.

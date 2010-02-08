@@ -28,10 +28,10 @@ class GeneticAlgorithm(object):
         # Reset end conditions
         # NOTE: Ranking a large initial population can be expensive, so
         #       this might be the best place to reset timers, etc.
-        [e.reset() for e in end]
+        [e.reset() for e in self.end]
 
         # Generate and rank initial population
-        initial_population = reproduce.random_population(initial_population_size)
+        initial_population = self.reproduce.random_population(initial_population_size)
         add_to_cache(initial_population, self.evaluate(initial_population), self.cache)
         ranked_initial_population = self.rank(initial_population, self.cache)
 
@@ -45,7 +45,7 @@ class GeneticAlgorithm(object):
         best_fitness     = self.cache[best]
 
         # Loop until any end condition is satisfied
-        while not any(e(best_fitness) for e in end):
+        while not any(e(best_fitness) for e in self.end):
             # Reproduce
             children = self.reproduce(ranked_population, self.cache)
 

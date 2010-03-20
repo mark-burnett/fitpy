@@ -3,7 +3,7 @@ import numpy
 import fitpy
 
 # Here's the functional form we will fit
-def functional_form(par, x):
+def functional_form(x, par):
     """
     par is a sequence of parameters (a chromosome in the fitting algorithm)
 

@@ -43,9 +43,10 @@ class GeneticAlgorithm(object):
         self.generations = [ranked_population]
         best             = ranked_population[0]
         best_fitness     = self.cache[best]
+        num_evaluations  = len(self.cache)
 
         # Loop until any end condition is satisfied
-        while not any(e(best_fitness) for e in self.end):
+        while not any(e(locals()) for e in self.end):
             # Reproduce
             children = self.reproduce(ranked_population, self.cache)
 
@@ -61,6 +62,7 @@ class GeneticAlgorithm(object):
             self.generations.append(ranked_population)
             best         = ranked_population[0]
             best_fitness = self.cache[best]
+            num_evaluations  = len(self.cache)
 
         return best, best_fitness
 

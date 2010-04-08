@@ -1,23 +1,26 @@
 import datetime
 
-__all__ = ['Counter', 'Timer', 'StoppedImproving']
+__all__ = ['MaxIterations', 'MaxRuntime', 'StoppedImproving']
 
 class Counter(object):
-    """
-    End condition to specify a maximum number of generations to run.
-    """
-    def __init__(self, num_generations):
-        self.num_left     = num_generations
-        self.num_starting = num_generations
-
-    def __call__(self, best_fitness):
-        self.num_left -= 1
-        return 0 >= self.num_left
-
+    def __init__(self, max_count):
+        self.max_count = max_count
+        self.remaining = max_count
+    def __call__(self, variables):
+        raise NotImplementedError()
     def reset(self):
-        self.num_left = self.num_starting
+        self.remaining = self.max_count
 
-class Timer(object):
+class MaxIterations(Counter):
+    def __call__(self, variables):
+        self.remaining -= 1
+        return 0 >= self.remaining
+
+class MaxEvaluations(Counter):
+    def __call__(self, variables):
+        return variables['num_evaluations'] < self.max_count
+
+class MaxRuntime(object):
     """
     End condition to specify a maximum amount of time to run (approximate).
     """
@@ -29,7 +32,7 @@ class Timer(object):
         self.run_duration = run_duration
         self.finish_time  = datetime.datetime.now() + run_duration
 
-    def __call__(self, best_fitness):
+    def __call__(self, variables):
         return self.finish_time < datetime.datetime.now()
 
     def reset(self):
@@ -46,7 +49,8 @@ class StoppedImproving(object):
         self.last_fitness = None
         self.finished = False
 
-    def __call__(self, best_fitness):
+    def __call__(self, variables):
+        best_fitness = variables['best_fitness']
         if not self.finished:
             if best_fitness == self.last_fitness:
                 self.unchanged += 1

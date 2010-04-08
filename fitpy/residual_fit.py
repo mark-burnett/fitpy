@@ -4,6 +4,9 @@ import datetime
 
 import logging
 
+from parameters import format_as_list
+import factories
+
 __all__ = ['residual_fit']
 
 log = logging.getLogger('fitpy.residual_fit')
@@ -18,7 +21,8 @@ def residual_fit(target_function, x_values, y_values,
                  fit_tolerance=None,
                  verbosity=None):
     '''
-    Important DOCSTRING.
+        Convenience function that finds a reasonable fit to x, y data using
+    'target_function'
     '''
     # Function overview
     # -------------------------------------------------------------------
@@ -64,45 +68,26 @@ def residual_fit(target_function, x_values, y_values,
     log.info('Found %d parameter(s) in target function.' % num_parameters)
 
     # Accept parameter constrains as either a dictionary or list.
-    parameter_constraint_list = []
-    if parameter_constraints:
-        log.debug('Found parameter constraints.')
-        if isinstance(parameter_constraints, dict):
-            for pn in parameter_names:
-                try:
-                    parameter_constraint_list.append(parameter_constraints[pn])
-                except KeyError:
-                    parameter_constraint_list.append(None)
-        else:
-            parameter_constraint_list = parameter_constraints
-        assert(len(parameter_constraint_list) == num_parameters)
+    parameter_constraint_list = format_as_list(
+                                    parameter_constraints, parameter_names)
 
     # Accept initial guess as either a dictionary or a list.
-    initial_guess_list = []
-    if initial_guess:
-        log.debug('Found initial parameter guess.')
-        if isinstance(initial_guess, dict):
-            for pn in parameter_names:
-                try:
-                    initial_guess_list.append(initial_guess[pn])
-                except KeyError:
-                    initial_guess_list.append(None)
-        else:
-            initial_guess_list = initial_guess
-        assert(len(initial_guess_list) == num_parameters)
+    initial_guess_list = format_as_list(inital_guess, parameter_names)
 
     # Construct algorithm
     # -------------------------------------------------------------------
     # Build fitness function/evaluation object
-    log.debug('Build fitness function.')
-    fit_func = residual_fitness_function(target_function, x_values, y_values,
-                                         y_stds, residual)
+    log.debug('Building fitness function.')
+    fit_func = factories.make_residual_fitness_function(target_function,
+                                                        x_values, y_values,
+                                                        y_stds, residual)
     # Build end_conditions objects
     log.debug('Building end conditions.')
-    ecs = simple_end_conditions(max_evaluations, max_runtime, fit_tolerance)
+    ecs = factories.make_simple_end_conditions(max_evaluations, max_runtime,
+                                               fit_tolerance)
     # Build algorithm object
     log.debug('Building algorithm object.')
-    fitting_algorithm = construct_genetic_algorithm(fit_func,
+    fitting_algorithm = factories.make_genetic_algorithm(fit_func,
                             parameter_constraint_list, ecs)
 
     # Perform fit

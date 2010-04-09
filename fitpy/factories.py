@@ -22,4 +22,13 @@ def make_simple_end_conditions(max_evaluations, max_runtime,
             end_conditions.FitTolerance(fit_tolerance)]
 
 def make_genetic_algorithm(fit_func, parameter_constraint_list, ecs):
-    pass
+    # 1) get a ranking function
+    ranking_function = ranking.multi_objective_ranking
+    # 2) make a reproduction object based on the parameter constraints
+    # this function returns a reproduction 
+    #     object based on parameter constraints.
+    reproduction_object = reproduction.factories.default_reproduction(
+                                                 parameter_contraint_list)
+    # 3) string together a bunch of objects into the algorithm
+    return algorithm.GeneticAlgorithm(fit_func, ranking_function, 
+                                                      reproduction_object, ecs)

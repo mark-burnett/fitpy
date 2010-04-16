@@ -64,7 +64,7 @@ def residual_fit(target_function, x_values, y_values,
     # Get names of the target_function's parameters.
     log.debug('Determining number and names of parameters.')
     parameter_names = inspect.getargspec(target_function).args[1:]
-    num_parameters = len(parameter_names)
+    num_parameters  = len(parameter_names)
     log.info('Found %d parameter(s) in target function.' % num_parameters)
 
     # Accept parameter constrains as either a dictionary or list.

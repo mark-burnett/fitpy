@@ -1,71 +1,63 @@
-from itertools import izip
+import itertools
 
 __all__ = ['GeneticAlgorithm']
 
+class Population(object):
+    def __init__(self):
+        self.generations = []
+        self.fitnesses   = []
+        self._cache      = {}
+
+    def __contains__(self, individual):
+        return individual in self._cache
+
+    def add_generation(self, generation, fitnesses):
+        for i, f, in itertools.izip(generation, fitnesses):
+            self._cache[i] = f
+        self.generations.append(generation)
+        self.fitnesses.append(fitnesses)
+
+    def get_fitness(self, i):
+        return self._cache[i]
+
 class GeneticAlgorithm(object):
-    """
-        Contains a template for performing a fairly general set of
-    genetic algorithms.
-    """
-    def __init__(self, evaluate, rank, reproduce, end):
-        """
-        evaluate:  Callabe that returns a fitness for a given chromosome.
-        rank:      Callable that returns a population sorted by fitness.
-        reproduce: Object that generates the next and intial generations
-        end:       Sequence of end conditions.  Stops when any is true.
-        """
-        self.evaluate  = evaluate
-        self.rank      = rank
-        self.reproduce = reproduce
-        self.end       = end
-        self.cache     = {}
+    def __init__(self, fitness_func, rank, reproduce, end):
+        self.fitness_func = fitness_func
+        self.rank         = rank
+        self.reproduce    = reproduce
+        self.end          = end
 
-    def fit(self, population_size, initial_population_size, elite_size):
-        assert(initial_population_size >= population_size)
-        assert(elite_size < population_size)
-        assert(elite_size >= 0)
+    def run(self, initial_population):
+        # Initialze the run
+        pop = Population()
 
-        # Reset end conditions
-        # NOTE: Ranking a large initial population can be expensive, so
-        #       this might be the best place to reset timers, etc.
+        initial_fitnesses = [self.fitness_func(*i) for i in initial_population]
+        ranked_gen, ranked_fitnesses = self.rank(initial_population,
+                                                 initial_fitnesses)
+        num_evaluations = len(ranked_gen)
+
+        pop.add_generation(ranked_gen, ranked_fitnesses)
+
         [e.reset() for e in self.end]
-
-        # Generate and rank initial population
-        initial_population = self.reproduce.random_population(initial_population_size)
-        add_to_cache(initial_population, self.evaluate(initial_population), self.cache)
-        ranked_initial_population = self.rank(initial_population, self.cache)
-
-        # Gather our first real generation
-        ranked_population = ranked_initial_population[:population_size]
-        elites            = ranked_initial_population[:elite_size]
-
-        # History and progress tracking
-        self.generations = [ranked_population]
-        best             = ranked_population[0]
-        best_fitness     = self.cache[best]
-        num_evaluations  = len(self.cache)
-
-        # Loop until any end condition is satisfied
         while not any(e(locals()) for e in self.end):
-            # Reproduce
-            children = self.reproduce(ranked_population, self.cache)
+            # Generate children
+            children, elites   = self.reproduce(ranked_gen, pop)
 
-            # Evaluate
-            add_to_cache(children, self.evaluate(children), self.cache)
+            # Evaluate children
+            children_fitnesses = [self.fitness_func(*c) for c in children]
+            elite_fitnesses    = [pop.get_fitness(i) for i in elites]
 
-            # Rank
-            ranked_children   = self.rank(children + elites, self.cache)
-            elites            = ranked_children[:elite_size]
-            ranked_population = ranked_children[:population_size]
+            # Rank the generation
+            ranked_gen, ranked_fitnesses = self.rank(children + elites,
+                                                     children_fitnesses + 
+                                                     elite_fitnesses)
+            # Store generation
+            pop.add_generation(ranked_gen, ranked_fitnesses)
 
-            # History and progress tracking
-            self.generations.append(ranked_population)
-            best         = ranked_population[0]
-            best_fitness = self.cache[best]
-            num_evaluations  = len(self.cache)
+            # Progress tracking
+            best             = pop.generations[-1][0]
+            best_fitness     = pop.fitnesses[-1][0]
+            num_evaluations += children
 
-        return best, best_fitness
-
-def add_to_cache(keys, values, cache):
-    for k, v in izip(keys, values):
-        cache[k] = v
+        # Return
+        return pop

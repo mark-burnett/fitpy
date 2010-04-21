@@ -23,4 +23,6 @@ def format_as_list(input, keys):
             log.critical('Expected %d input values, got %d.' %
                     (len(keys), len(output)))
             raise IndexError('Inconsistent lengths when formatting list.')
+    else:
+        return None
     return output

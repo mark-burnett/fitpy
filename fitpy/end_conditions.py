@@ -20,6 +20,17 @@ class MaxEvaluations(Counter):
     def __call__(self, variables):
         return variables['num_evaluations'] < self.max_count
 
+class FitTolerance(object):
+    '''
+    End condition to specify a minimum residual or cost function.
+    '''
+    def __init__(self, tolerance):
+        self.tolerance = tolerance
+    def __call__(self, variables):
+        return  variables['best_fitness'] < self.tolerance
+    def reset(self):
+        pass
+    
 class MaxRuntime(object):
     """
     End condition to specify a maximum amount of time to run (approximate).

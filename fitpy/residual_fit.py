@@ -72,7 +72,7 @@ def residual_fit(target_function, x_values, y_values,
                                     parameter_constraints, parameter_names)
 
     # Accept initial guess as either a dictionary or a list.
-    initial_guess_list = format_as_list(inital_guess, parameter_names)
+    initial_guess_list = format_as_list(initial_guess, parameter_names)
 
     # Construct algorithm
     # -------------------------------------------------------------------

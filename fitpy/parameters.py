@@ -24,5 +24,5 @@ def format_as_list(input, keys):
                     (len(keys), len(output)))
             raise IndexError('Inconsistent lengths when formatting list.')
     else:
-        return None
+        return [None for k in keys]
     return output

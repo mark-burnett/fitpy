@@ -83,6 +83,8 @@ def residual_fit(target_function, x_values, y_values,
                                                         y_stds, residual)
     # Build end_conditions objects
     log.debug('Building end conditions.')
+#    if fit_tolerance is None:
+#        fit_tolerance = float(len(x_values))/2
     ecs = factories.make_simple_end_conditions(max_evaluations, max_runtime,
                                                fit_tolerance)
     # Build algorithm object
@@ -92,8 +94,16 @@ def residual_fit(target_function, x_values, y_values,
 
     # Perform fit
     # -------------------------------------------------------------------
+    log.info('Generating initial population.')
+    initial_generation_list = fitting_algorithm.get_initial_generation(
+                                  initial_guess_list)
     log.info('Beginning fit.')
-    best_parameters, best_residual = fitting_algorithm.run(initial_guess_list)
+    final_population = fitting_algorithm.run(initial_generation_list)
+
+    best_parameters  = final_population.generations[-1][0]
+    best_residual    = final_population.fitnesses[-1][0]
+
+    print best_parameters, best_residual
     log.info('Fit complete: best residual %f.' % best_residual)
 
     # Cleanup

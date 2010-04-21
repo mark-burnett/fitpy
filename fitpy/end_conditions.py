@@ -18,7 +18,7 @@ class MaxIterations(Counter):
 
 class MaxEvaluations(Counter):
     def __call__(self, variables):
-        return variables['num_evaluations'] < self.max_count
+        return variables['num_evaluations'] >= self.max_count
 
 class FitTolerance(object):
     '''

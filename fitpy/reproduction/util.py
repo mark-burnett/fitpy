@@ -1,3 +1,6 @@
+import copy
+import random
+
 def binary_crossover(a, b, rate):
     """
     Performs a normal crossover between a and b, generating 2 children.
@@ -28,25 +31,25 @@ def discrete_mutation(c, rate, allowed_values):
             m[i] = random.choice(allowed_values[i])
     return m
 
-def discrete_perturbation(c, rate, allowed_values):
+def discrete_perturbation(individual, rate, allowed_values):
     """
     Randomly vary parameters to neighboring values given rate.
     """
-    m = copy.copy(c)
-    for i in xrange(len(m)):
+    ind = copy.copy(individual)
+    for par_index, par_value in enumerate(ind):
         r = random.random()
         if r < rate:
-            vi = allowed_values.index(m[i])
-            if 0 == vi:
-                m[i] = allowed_values[i][1]
-            elif len(allowed_values[i]) - 1 == vi:
-                m[i] = allowed_values[i][-2]
+            value_index = allowed_values[par_index].index(par_value)
+            if 0 == value_index:
+                ind[par_index] = allowed_values[par_index][1]
+            elif len(allowed_values[par_index]) - 1 == value_index:
+                ind[par_index] = allowed_values[par_index][-2]
             else:
                 if r < rate/2:
-                    m[i] = allowed_values[i][vi - 1]
+                    ind[par_index] = allowed_values[par_index][value_index - 1]
                 else:
-                    m[i] = allowed_values[i][vi + 1]
-    return m
+                    ind[par_index] = allowed_values[par_index][value_index + 1]
+    return ind
         
 def select_parents(ranked_population):
     """

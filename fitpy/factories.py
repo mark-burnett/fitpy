@@ -2,6 +2,7 @@ from residuals import residual_functions
 import end_conditions
 import ranking
 import reproduction.factories
+import algorithm
 
 __all__ = ['make_residual_fitness_function',
            'make_simple_end_conditions',
@@ -25,12 +26,12 @@ def make_simple_end_conditions(max_evaluations, max_runtime,
 
 def make_genetic_algorithm(fit_func, parameter_constraint_list, ecs):
     # 1) get a ranking function
-    ranking_function = ranking.multi_objective
+    ranking_function = ranking.general
     # 2) make a reproduction object based on the parameter constraints
     # this function returns a reproduction 
     #     object based on parameter constraints.
     reproduction_object = reproduction.factories.default_reproduction(
-                                                 parameter_contraint_list)
+                                                 parameter_constraint_list)
     # 3) string together a bunch of objects into the algorithm
     return algorithm.GeneticAlgorithm(fit_func, ranking_function, 
                                                       reproduction_object, ecs)

@@ -57,8 +57,8 @@ class GeneticAlgorithm(object):
         best_fitness = pop.fitnesses[-1][0]
 
         [e.reset() for e in self.end]
-        var = locals()
-        while not any(e(var) for e in self.end):
+        ec_locals = locals()
+        while not any(e(ec_locals) for e in self.end):
             # Generate children
             log.debug('Generating individuals for generation %d.'
                         % len(pop.generations))
@@ -87,6 +87,7 @@ class GeneticAlgorithm(object):
             best             = pop.generations[-1][0]
             best_fitness     = pop.fitnesses[-1][0]
             num_evaluations += len(children)
+            ec_locals = locals()
 
         # Return
         return pop

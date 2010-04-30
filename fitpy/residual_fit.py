@@ -1,11 +1,12 @@
 import inspect
 import collections
-import datetime
 
 import logging
 
-from parameters import format_as_list
-import factories
+from fitpy.util.parameters import format_as_list
+from fitpy.algorithm import factory
+
+from fitpy.settings import *
 
 __all__ = ['residual_fit']
 
@@ -13,13 +14,14 @@ log = logging.getLogger('fitpy.residual_fit')
 
 def residual_fit(target_function, x_values, y_values,
                  y_stds=None,
-                 residual='chi_squared',
+                 residual_name=DEFAULT_RESIDUAL_NAME,
                  parameter_constraints=None,
                  initial_guess=None,
-                 max_evaluations=100000,
-                 max_runtime=datetime.timedelta(minutes=5),
+                 max_evaluations=DEFAULT_MAX_EVALUATIONS,
+                 max_runtime=DEFAULT_MAX_RUNTIME,
                  fit_tolerance=None,
-                 verbosity=None):
+                 verbosity=None,
+                 algorithm_name=DEFAULT_ALGORITHM_NAME):
     '''
         Convenience function that finds a reasonable fit to x, y data using
     'target_function'
@@ -78,33 +80,28 @@ def residual_fit(target_function, x_values, y_values,
     # -------------------------------------------------------------------
     # Build fitness function/evaluation object
     log.debug('Building fitness function.')
-    fit_func = factories.make_residual_fitness_function(target_function,
-                                                        x_values, y_values,
-                                                        y_stds, residual)
+    fit_func = factory.make_residual_fitness_function(target_function,
+                                                      x_values, y_values,
+                                                      y_stds, residual_name)
     # Build end_conditions objects
     log.debug('Building end conditions.')
+# XXX do something special with tolerance stuff.
 #    if fit_tolerance is None:
 #        fit_tolerance = float(len(x_values))/2
-    ecs = factories.make_simple_end_conditions(max_evaluations, max_runtime,
-                                               fit_tolerance)
+    ecs = factory.make_simple_end_conditions(max_evaluations, max_runtime,
+                                             fit_tolerance)
     # Build algorithm object
     log.debug('Building algorithm object.')
-    fitting_algorithm = factories.make_genetic_algorithm(fit_func,
-                            parameter_constraint_list, ecs)
+    fitting_algorithm = factory.make_algorithm(fit_func,
+                                               parameter_constraint_list,
+                                               ecs, algorithm_name)
 
     # Perform fit
     # -------------------------------------------------------------------
-    log.info('Generating initial population.')
-    initial_generation_list = fitting_algorithm.get_initial_generation(
-                                  initial_guess_list)
     log.info('Beginning fit.')
-    final_population = fitting_algorithm.run(initial_generation_list)
+    result = fitting_algorithm.run(initial_guess_list)
 
-    best_parameters  = final_population.generations[-1][0]
-    best_residual    = final_population.fitnesses[-1][0]
-
-    print best_parameters, best_residual
-    log.info('Fit complete: best residual %f.' % best_residual)
+    log.info('Fit complete: best residual %f.' % result['best_residual'])
 
     # Cleanup
     # -------------------------------------------------------------------
@@ -113,4 +110,4 @@ def residual_fit(target_function, x_values, y_values,
     if verbosity:
         fplog.setLevel(old_logging_level)
 
-    return best_parameters, best_residual
+    return result

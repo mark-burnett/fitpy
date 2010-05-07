@@ -1,7 +1,8 @@
 import inspect
 import collections
-
 import logging
+
+from .util import logutils
 
 from .util.parameters import format_as_list
 from .algorithms import factories
@@ -10,7 +11,7 @@ from .settings import *
 
 __all__ = ['residual_fit']
 
-log = logging.getLogger('fitpy.residual_fit')
+logger = logutils.getLogger(__file__)
 
 def residual_fit(target_function, x_values, y_values,
                  y_stds=None,
@@ -43,32 +44,33 @@ def residual_fit(target_function, x_values, y_values,
 
     # Setup logging (using verbosity)
     # -------------------------------------------------------------------
-    log = logging.getLogger('fitpy.residual_fit')
     if verbosity:
+        # find out the logging level of highest level logger and remember it.
         fplog = logging.getLogger('fitpy')
         old_logging_level = fplog.getEffectiveLevel()
+        # this setting will percolate down to lower level loggers.
         fplog.setLevel(verbosity)
 
     # Clean up input
     # -------------------------------------------------------------------
-    log.debug('Verifying input.')
+    logger.debug('Verifying input.')
     # Verify target function is callable
     if not isinstance(target_function, collections.Callable):
-        log.critical(
+        logger.critical(
          'target_function must be a function or object with a __call__ method.')
         raise TypeError('target_function is not callable.')
     # Make sure x_values and y_values have same length
     if not len(x_values) == len(y_values):
-        log.critical('length of x_values and y_values must be equal.')
+        logger.critical('length of x_values and y_values must be equal.')
         raise ValueError('Length of x_values and y_values not equal.')
 
     # Consolodate parameter information
     # -------------------------------------------------------------------
     # Get names of the target_function's parameters.
-    log.debug('Determining number and names of parameters.')
+    logger.debug('Determining number and names of parameters.')
     parameter_names = inspect.getargspec(target_function).args[1:]
     num_parameters  = len(parameter_names)
-    log.info('Found %d parameter(s) in target function.' % num_parameters)
+    logger.info('Found %d parameter(s) in target function.' % num_parameters)
 
     # Accept parameter constrains as either a dictionary or list.
     parameter_constraint_list = format_as_list(
@@ -80,20 +82,20 @@ def residual_fit(target_function, x_values, y_values,
     # Construct algorithm
     # -------------------------------------------------------------------
     # Build fitness function/evaluation object
-    log.debug('Building fitness function.')
+    logger.debug('Building fitness function.')
     fit_func = factories.make_residual_fitness_function(target_function,
                                                         x_values, y_values,
                                                         y_stds, residual_name,
                                                         **kwargs)
     # Build end_conditions objects
-    log.debug('Building end conditions.')
+    logger.debug('Building end conditions.')
 # XXX do something special with tolerance stuff.
 #    if fit_tolerance is None:
 #        fit_tolerance = float(len(x_values))/2
     ecs = factories.make_simple_end_conditions(max_evaluations, max_runtime,
                                                fit_tolerance, **kwargs)
     # Build algorithm object
-    log.debug('Building algorithm object.')
+    logger.debug('Building algorithm object.')
     fitting_algorithm = factories.make_algorithm(fit_func,
                                                  parameter_constraint_list,
                                                  ecs, algorithm_name,
@@ -101,10 +103,10 @@ def residual_fit(target_function, x_values, y_values,
 
     # Perform fit
     # -------------------------------------------------------------------
-    log.info('Beginning fit.')
+    logger.info('Beginning fit.')
     result = fitting_algorithm.run(initial_guess_list, **kwargs)
 
-    log.info('Fit complete: best residual %f.' % result['best_residual'])
+    logger.info('Fit complete: best residual %f.' % result['best_residual'])
 
     # Cleanup
     # -------------------------------------------------------------------

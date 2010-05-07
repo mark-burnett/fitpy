@@ -1,10 +1,11 @@
-import logging
 import itertools
+
+from fitpy.util import logutils
 
 from . import population
 from .settings import *
 
-log = logging.getLogger('fitpy.algorithms.genetic.strategies')
+logger = logutils.getLogger(__file__)
 
 __all__ = ['GeneticAlgorithm']
 
@@ -29,7 +30,7 @@ class GeneticAlgorithm(object):
         initial_generation = self.get_initial_generation(initial_guess_list)
         pop = population.Population()
 
-        log.debug('Evaluating initial generation.')
+        logger.debug('Evaluating initial generation.')
         initial_fitnesses = [self.fitness_func(i) for i in initial_generation]
         ranked_gen, ranked_fitnesses = self.rank(initial_generation,
                                                  initial_fitnesses)
@@ -44,26 +45,26 @@ class GeneticAlgorithm(object):
         ec_locals = locals()
         while not any(e(ec_locals) for e in self.end):
             # Generate children
-            log.debug('Generating individuals for generation %d.'
+            logger.debug('Generating individuals for generation %d.'
                         % len(pop.generations))
             children, elites   = self.reproduce.generate_children(
                                     ranked_gen, self.generation_size,
                                     self.elite_size, pop)
 
             # Evaluate children
-            log.debug('Evaluating generation %d.'
+            logger.debug('Evaluating generation %d.'
                         % len(pop.generations))
             children_fitnesses = [self.fitness_func(c) for c in children]
             elite_fitnesses    = ranked_fitnesses[:self.elite_size]
 
             # Rank the generation
-            log.debug('Ranking generation %d.'
+            logger.debug('Ranking generation %d.'
                         % len(pop.generations))
             ranked_gen, ranked_fitnesses = self.rank(children + elites,
                                                      children_fitnesses + 
                                                      elite_fitnesses)
             # Store generation
-            log.debug('Storing generation %d.'
+            logger.debug('Storing generation %d.'
                         % len(pop.generations))
             pop.add_generation(ranked_gen, ranked_fitnesses)
 

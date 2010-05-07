@@ -1,10 +1,11 @@
 import copy
 import random
-import logging
 
-from fitpy.algorithms.common import choice
+from fitpy.util import logutils
 
-log = logging.getLogger('fitpy.algorithms.genetic.reproduction')
+from ..common import choice
+
+logger = logutils.getLogger(__file__)
 
 class DiscreteStandard(object):
     def __init__(self, allowed_parameter_values,
@@ -40,12 +41,12 @@ class DiscreteStandard(object):
             if c1 not in pop and c1 not in children:
                 children.append(c1)
             else:
-                log.debug('Created non-unique child, %s.' % str(c1))
+                logger.debug('Created non-unique child, %s.' % str(c1))
 
             if len(children) >= num_children:
-                log.debug('Created unnecessary child, %s.' % str(c2))
+                logger.debug('Created unnecessary child, %s.' % str(c2))
             elif c2 in pop or c2 in children:
-                log.debug('Created non-unique child, %s.' % str(c2))
+                logger.debug('Created non-unique child, %s.' % str(c2))
             else:
                 children.append(c2)
 

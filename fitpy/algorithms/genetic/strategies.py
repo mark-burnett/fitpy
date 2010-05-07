@@ -1,6 +1,6 @@
 import itertools
 
-from fitpy.util import logutils
+from fitpy.utils import logutils
 
 from . import population
 from .settings import *

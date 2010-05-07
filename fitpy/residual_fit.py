@@ -2,9 +2,9 @@ import inspect
 import collections
 import logging
 
-from .util import logutils
+from .utils import logutils
 
-from .util.parameters import format_as_list
+from .utils.parameters import format_as_list
 from .algorithms import factories
 
 from .settings import *

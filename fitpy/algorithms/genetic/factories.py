@@ -6,11 +6,9 @@ from . import reproduction
 
 from .settings import *
 
-from fitpy.util import meshes
+from fitpy.utils import meshes
 
-__all__ = ['make_residual_fitness_function',
-           'make_simple_end_conditions',
-           'make_genetic_algorithm']
+__all__ = ['make_algorithm']
 
 def make_algorithm(fit_func, parameter_constraint_list, ecs, **kwargs):
     # 1) get a ranking function

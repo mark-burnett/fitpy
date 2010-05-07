@@ -1,7 +1,7 @@
 import copy
 import random
 
-from fitpy.util import logutils
+from fitpy.utils import logutils
 
 from ..common import choice
 

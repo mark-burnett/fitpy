@@ -1,4 +1,3 @@
-import residuals
-import end_conditions
-import choice
-
+from . import residuals
+from . import end_conditions
+from . import choice

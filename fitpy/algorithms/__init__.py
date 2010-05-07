@@ -1,6 +1,6 @@
 import os
 
-import common
+from . import common
 
 # Generate list of legal algorithm names.
 _ignored_strings = ['.', 'common']

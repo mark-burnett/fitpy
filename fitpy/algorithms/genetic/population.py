@@ -1,7 +1,7 @@
 import logging
 import itertools
 
-log = logging.getLogger('fitpy.algorithm')
+log = logging.getLogger('fitpy.algorithms.genetic.population')
 
 __all__ = ['GeneticAlgorithm']
 

@@ -3,10 +3,10 @@ import collections
 
 import logging
 
-from fitpy.util.parameters import format_as_list
-from fitpy.algorithms import factories
+from .util.parameters import format_as_list
+from .algorithms import factories
 
-from fitpy.settings import *
+from .settings import *
 
 __all__ = ['residual_fit']
 

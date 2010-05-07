@@ -4,7 +4,7 @@ import collections
 import logging
 
 from fitpy.util.parameters import format_as_list
-from fitpy.algorithm import factory
+from fitpy.algorithms import factories
 
 from fitpy.settings import *
 
@@ -21,7 +21,8 @@ def residual_fit(target_function, x_values, y_values,
                  max_runtime=DEFAULT_MAX_RUNTIME,
                  fit_tolerance=None,
                  verbosity=None,
-                 algorithm_name=DEFAULT_ALGORITHM_NAME):
+                 algorithm_name=DEFAULT_ALGORITHM_NAME,
+                 **kwargs):
     '''
         Convenience function that finds a reasonable fit to x, y data using
     'target_function'
@@ -80,26 +81,28 @@ def residual_fit(target_function, x_values, y_values,
     # -------------------------------------------------------------------
     # Build fitness function/evaluation object
     log.debug('Building fitness function.')
-    fit_func = factory.make_residual_fitness_function(target_function,
-                                                      x_values, y_values,
-                                                      y_stds, residual_name)
+    fit_func = factories.make_residual_fitness_function(target_function,
+                                                        x_values, y_values,
+                                                        y_stds, residual_name,
+                                                        **kwargs)
     # Build end_conditions objects
     log.debug('Building end conditions.')
 # XXX do something special with tolerance stuff.
 #    if fit_tolerance is None:
 #        fit_tolerance = float(len(x_values))/2
-    ecs = factory.make_simple_end_conditions(max_evaluations, max_runtime,
-                                             fit_tolerance)
+    ecs = factories.make_simple_end_conditions(max_evaluations, max_runtime,
+                                               fit_tolerance, **kwargs)
     # Build algorithm object
     log.debug('Building algorithm object.')
-    fitting_algorithm = factory.make_algorithm(fit_func,
-                                               parameter_constraint_list,
-                                               ecs, algorithm_name)
+    fitting_algorithm = factories.make_algorithm(fit_func,
+                                                 parameter_constraint_list,
+                                                 ecs, algorithm_name,
+                                                 **kwargs)
 
     # Perform fit
     # -------------------------------------------------------------------
     log.info('Beginning fit.')
-    result = fitting_algorithm.run(initial_guess_list)
+    result = fitting_algorithm.run(initial_guess_list, **kwargs)
 
     log.info('Fit complete: best residual %f.' % result['best_residual'])
 

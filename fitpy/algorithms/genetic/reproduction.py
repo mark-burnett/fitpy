@@ -2,9 +2,9 @@ import copy
 import random
 import logging
 
-import util
+from fitpy.algorithms.common import choice
 
-log = logging.getLogger('fitpy.reproduction.reproduction_objects')
+log = logging.getLogger('fitpy.algorithms.genetic.reproduction')
 
 class DiscreteStandard(object):
     def __init__(self, allowed_parameter_values,
@@ -23,29 +23,29 @@ class DiscreteStandard(object):
         children = []
         while len(children) < num_children:
             # Choose parents
-            p1, p2 = util.select_parents(parents)
+            p1, p2 = choice.choose_two(parents, choice.weighted_choice)
 
             # Create potential children
-            c1, c2 = util.binary_crossover(p1, p2, self.crossover_rate)
-            c1 = util.discrete_mutation(c1, self.mutation_rate,
-                                        self.allowed_parameter_values)
-            c2 = util.discrete_mutation(c2, self.mutation_rate,
-                                        self.allowed_parameter_values)
-            c1 = tuple(util.discrete_perturbation(c1, self.perturbation_rate,
-                                                 self.allowed_parameter_values))
-            c2 = tuple(util.discrete_perturbation(c2, self.perturbation_rate,
-                                                 self.allowed_parameter_values))
+            c1, c2 = binary_crossover(p1, p2, self.crossover_rate)
+            c1 = discrete_mutation(c1, self.mutation_rate,
+                                   self.allowed_parameter_values)
+            c2 = discrete_mutation(c2, self.mutation_rate,
+                                   self.allowed_parameter_values)
+            c1 = tuple(discrete_perturbation(c1, self.perturbation_rate,
+                                            self.allowed_parameter_values))
+            c2 = tuple(discrete_perturbation(c2, self.perturbation_rate,
+                                            self.allowed_parameter_values))
             
             # Add unique children to next generation
             if c1 not in pop and c1 not in children:
                 children.append(c1)
             else:
-                log.debug('Created non-unique child.')
+                log.debug('Created non-unique child, %s.' % str(c1))
 
             if len(children) >= num_children:
-                log.debug('Created unnecessary child.')
+                log.debug('Created unnecessary child, %s.' % str(c2))
             elif c2 in pop or c2 in children:
-                log.debug('Created non-unique child.')
+                log.debug('Created non-unique child, %s.' % str(c2))
             else:
                 children.append(c2)
 

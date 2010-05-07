@@ -1,36 +1,35 @@
-from residuals import residual_functions
-import end_conditions
-import ranking
-import reproduction.factories
-import algorithm
+import math
+
+from . import strategies
+from . import rankings
+from . import reproduction
+
+from .settings import *
+
+from fitpy.util import meshes
 
 __all__ = ['make_residual_fitness_function',
            'make_simple_end_conditions',
            'make_genetic_algorithm']
 
-def make_genetic_algorithm(fit_func, parameter_constraint_list, ecs):
+def make_algorithm(fit_func, parameter_constraint_list, ecs, **kwargs):
     # 1) get a ranking function
-    ranking_function = ranking.general
+    ranking_function = rankings.general
     # 2) make a reproduction object based on the parameter constraints
     # this function returns a reproduction 
     #     object based on parameter constraints.
-    reproduction_object = reproduction.factories.default_reproduction(
-                                                 parameter_constraint_list)
+    reproduction_object = make_default_reproduction(parameter_constraint_list,
+                                                    **kwargs)
     # 3) string together a bunch of objects into the algorithm
-    return algorithm.GeneticAlgorithm(fit_func, ranking_function, 
-                                                      reproduction_object, ecs)
+    return strategies.GeneticAlgorithm(fit_func, ranking_function, 
+                                       reproduction_object, ecs)
 
-import math
-
-from fitpy.settings import * # all default settings will be in all caps.
-import fitpy.meshes as meshes
-import reproduction_objects
-
-def default_reproduction(parameter_constraint_list, 
-                         crossover_rate=DEFAULT_CROSSOVER_RATE, 
-                         mutation_rate=DEFAULT_MUTATION_RATE,
-                         perturbation_rate=DEFAULT_PERTURBATION_RATE,
-                         num_points=DEFAULT_NUMBER_SAMPLE_POINTS):
+def make_default_reproduction(parameter_constraint_list, 
+                              crossover_rate=DEFAULT_CROSSOVER_RATE, 
+                              mutation_rate=DEFAULT_MUTATION_RATE,
+                              perturbation_rate=DEFAULT_PERTURBATION_RATE,
+                              num_points=DEFAULT_NUMBER_SAMPLE_POINTS,
+                              **kwargs):
     """
     Inputs:
         parameter_constraint_list   : A list of tuples which
@@ -47,15 +46,9 @@ def default_reproduction(parameter_constraint_list,
     Returns:
         reproduction_object
     """
-    # find out if any parameters have no constraints
-    for constraint in parameter_constraint_list:
-        if constraint is None:
-            # hand off to more flexible reproduction
-            raise NotImplementedError()
-            
     allowed_parameter_values = []
     # determine the allowed parameter values
-    for lower,upper in parameter_constraint_list:
+    for lower, upper in parameter_constraint_list:
         # figure out the mesh details
         if math.log(upper-lower, 10) > 3.0:
             # if the constraints vary over more than 3 orders...
@@ -65,7 +58,7 @@ def default_reproduction(parameter_constraint_list,
         allowed_parameter_values.append(mesh)    
 
     # return basic constrained reproduction
-    return reproduction_objects.DiscreteStandard(allowed_parameter_values, 
-                                                 crossover_rate,
-                                                 mutation_rate,
-                                                 perturbation_rate)
+    return reproduction.DiscreteStandard(allowed_parameter_values, 
+                                         crossover_rate,
+                                         mutation_rate,
+                                         perturbation_rate)

@@ -1,3 +1,5 @@
+import random
+
 def choose_two(sequence, select_function):
     """
     Picks 2 unique items from the sequence.

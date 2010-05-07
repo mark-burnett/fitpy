@@ -1,7 +1,8 @@
 import logging
 import itertools
 
-from fitpy.settings import *
+from . import population
+from .settings import *
 
 log = logging.getLogger('fitpy.algorithm')
 
@@ -23,9 +24,10 @@ class GeneticAlgorithm(object):
             raise NotImplementedError('Initial guesses not allowed.')
         return self.reproduce.random_generation(self.generation_size)
 
-    def run(self, initial_generation):
+    def run(self, initial_guess_list):
         # Initialze the run
-        pop = Population()
+        initial_generation = self.get_initial_generation(initial_guess_list)
+        pop = population.Population()
 
         log.debug('Evaluating initial generation.')
         initial_fitnesses = [self.fitness_func(i) for i in initial_generation]
@@ -72,4 +74,5 @@ class GeneticAlgorithm(object):
             ec_locals = locals()
 
         # Return
-        return pop
+        return {'population': pop, 'best_parameters': best,
+                'best_residual': best_fitness}

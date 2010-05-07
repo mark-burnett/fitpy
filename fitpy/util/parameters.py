@@ -4,6 +4,9 @@ __all__ = ['format_as_list']
 
 log = logging.getLogger('fitpy.parameters')
 
+def guess_initial_parameter_constraints():
+    raise NotImplementedError()
+
 def format_as_list(input, keys):
     if input:
         if isinstance(input, dict):

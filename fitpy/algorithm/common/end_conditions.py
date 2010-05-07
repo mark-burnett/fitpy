@@ -38,9 +38,14 @@ class MaxRuntime(object):
     def __init__(self, run_duration):
         """
         run_duration is the amount of time to run the simulation.
-            Must be a datetime.timedelta() object.
+            Must be either a datetime.timedelta() object, or a number of
+            seconds.
         """
-        self.run_duration = run_duration
+        try:
+            self.run_duration = datetime.timedelta(seconds=run_duration)
+        except TypeError:
+            self.run_duration = run_duration
+
         self.finish_time  = datetime.datetime.now() + run_duration
 
     def __call__(self, variables):

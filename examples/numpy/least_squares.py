@@ -28,15 +28,19 @@ fit_results = fitpy.residual_fit(functional_form, x, data,
                                                          'b':(-5, 5), 
                                                          'c':(-5, 5)}, 
                                  verbosity=10, # FIXME remove after testing...
+                                 generation_size=10000,
                                  max_evaluations=5000)
+                                 
 fit_parameters = fit_results['best_parameters']
-chi_squared    = fit_results['best_residual']
+chi_squared    = fit_results['evaluation_cache'][fit_parameters]
 
 # Show the result of the fit
 print 'Chi-squared per datum:', chi_squared/data_size
 print 'Percent errors for the fit parameters:'
-print [(f - t)/t for f, t in zip(fit_parameters, target_parameters)]
+percent_errors = [('% 0.3f' % (100*(f - t)/t)) for f, t in zip(fit_parameters, target_parameters)]
+print ' '.join(percent_errors)
 
+'''
 try: # in case the users don't have matplotlib installed on the system.
     import pylab
 
@@ -49,3 +53,4 @@ try: # in case the users don't have matplotlib installed on the system.
     pylab.show()
 except ImportError:
     pass
+    '''

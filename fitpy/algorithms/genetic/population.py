@@ -1,21 +1,15 @@
 import itertools
 
-__all__ = ['GeneticAlgorithm']
+from ..common.evaluation_cache import EvaluationCache
 
-class Population(object):
+
+class Population(EvaluationCache):
     def __init__(self):
+        EvaluationCache.__init__(self)
         self.generations = []
-        self.fitnesses   = []
-        self._cache      = {}
-
-    def __contains__(self, individual):
-        return individual in self._cache
 
     def add_generation(self, generation, fitnesses):
         for i, f, in itertools.izip(generation, fitnesses):
-            self._cache[i] = f
+            self[i] = f
         self.generations.append(generation)
-        self.fitnesses.append(fitnesses)
 
-    def get_fitness(self, i):
-        return self._cache[i]

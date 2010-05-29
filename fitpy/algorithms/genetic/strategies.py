@@ -25,7 +25,7 @@ class GeneticAlgorithm(object):
             raise NotImplementedError('Initial guesses not allowed.')
         return self.reproduce.random_generation(self.generation_size)
 
-    def run(self, initial_guess_list):
+    def run(self, initial_guess_list, **kwargs):
         # Initialze the run
         initial_generation = self.get_initial_generation(initial_guess_list)
         pop = population.Population()
@@ -39,7 +39,7 @@ class GeneticAlgorithm(object):
         pop.add_generation(ranked_gen, ranked_fitnesses)
 
         best         = pop.generations[-1][0]
-        best_fitness = pop.fitnesses[-1][0]
+        best_fitness = pop[best]
 
         [e.reset() for e in self.end]
         ec_locals = locals()
@@ -64,16 +64,15 @@ class GeneticAlgorithm(object):
                                                      children_fitnesses + 
                                                      elite_fitnesses)
             # Store generation
-            logger.debug('Storing generation %d.'
-                        % len(pop.generations))
             pop.add_generation(ranked_gen, ranked_fitnesses)
+            logger.debug('Stored generation %d of size %d.'
+                        % (len(pop.generations), len(ranked_gen)))
 
             # Progress tracking
             best             = pop.generations[-1][0]
-            best_fitness     = pop.fitnesses[-1][0]
+            best_fitness     = pop[best]
             num_evaluations += len(children)
             ec_locals = locals()
 
         # Return
-        return {'population': pop, 'best_parameters': best,
-                'best_residual': best_fitness}
+        return {'evaluation_cache': pop, 'best_parameters': best}

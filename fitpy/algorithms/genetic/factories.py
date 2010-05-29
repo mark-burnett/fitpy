@@ -20,7 +20,7 @@ def make_algorithm(fit_func, parameter_constraint_list, ecs, **kwargs):
                                                     **kwargs)
     # 3) string together a bunch of objects into the algorithm
     return strategies.GeneticAlgorithm(fit_func, ranking_function, 
-                                       reproduction_object, ecs)
+                                       reproduction_object, ecs, **kwargs)
 
 def make_default_reproduction(parameter_constraint_list, 
                               crossover_rate=DEFAULT_CROSSOVER_RATE, 

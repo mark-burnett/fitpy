@@ -2,7 +2,7 @@ import datetime
 import time
 import unittest
 
-from fitpy import end_conditions
+from fitpy.algorithms.common import end_conditions
 
 class TestCounter(unittest.TestCase):
     def testNormal(self):

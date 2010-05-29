@@ -1,4 +1,5 @@
 import inspect
+import itertools
 import collections
 import logging
 
@@ -106,7 +107,11 @@ def residual_fit(target_function, x_values, y_values,
     logger.info('Beginning fit.')
     result = fitting_algorithm.run(initial_guess_list, **kwargs)
 
-    logger.info('Fit complete: best residual %f.' % result['best_residual'])
+    best_parameters = result['best_parameters']
+    logger.info('Fit complete: best residual %f.' % 
+                result['evaluation_cache'][best_parameters])
+    for name, value in itertools.izip(parameter_names, best_parameters):
+        logger.info('%s = % f' % (name, value))
 
     # Cleanup
     # -------------------------------------------------------------------

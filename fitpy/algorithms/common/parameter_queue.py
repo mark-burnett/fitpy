@@ -1,94 +1,91 @@
-from itertools import izip
-from collections import namedtupple
+import bisect
 
-class ParameterQueue(object):
+from itertools import izip
+from collections import namedtuple
+
+from .settings import *
+
+MORankingProperties = namedtuple('MORankingProperties',
+                                 'trails trumps age fitness parameters')
+SORankingProperties = namedtuple('SORankingProperties',
+                                 'fitness parameters')
+
+class SingleObjectiveParameterQueue(list):
+    def __init__(self, max_length=DEFAULT_MAX_RANKING_LENGTH, **kwargs):
+        self.max_length = max_length
+
+    def append(self, item):
+        raise NotImplementedError(
+            "Cannot append elements to this container.  Try 'add' instead.")
+
+    def add(self, new_parameters, new_fitness):
+        try:
+            if new_fitness < self[-1].fitness:
+                pass
+        except IndexError:
+            pass
+
+        bisect.insort_left(self, SORankingProperties(new_fitness, new_parameters))
+
+        if(len(self) > self.max_length):
+            self.pop()
+
+class MultiObjectiveParameterQueue(list):
     '''
         A ranked list of parameter batches, ranked based on their evaluation 
     fitnesses.  If the fitness function returns multiple values then 
     multi-objective ranking is used.  Parameter batches are ranked as they 
     are added.
     '''
-    def __init__(self, max_length=DEFAULT_MAX_RANKING_LENGTH):
-        self._parameter_batches = []
-        self._fitnesses = []
-        self._scores = []
-        self._trumps = []
-        self._trails = []
+    def __init__(self, max_length=DEFAULT_MAX_RANKING_LENGTH, **kwargs):
+        self._current_age = 0
         self.max_length
         
-    def determine_kind(self, fitness):
+    def append(self, item):
+        raise NotImplementedError(
+            "Cannot append elements to this container.  Try 'add' instead.")
+
+    def add(self, new_parameters, new_fitness):
         try:
-            iter(fitness)
-            self.add = self.multi_objective_add 
-        except TypeError:
-            self.add = self.single_objective_add
+            if trails(new_fitness, self[-1].fitness):
+                return
+        except IndexError:
+            pass
 
-    def add(self, parameter_batch, fitness):
-        self.determine_kind(fitness)
-        self.add(parameter_batch, fitness)
+        num_trumps = 0
+        num_trails = 0
+        for i, rp in enumerate(self):
+            if trumps(new_fitness, rp.fitness):
+                num_trumps += 1
+                rp.trails += 1
+            elif trails(new_fitness, rp.fitness):
+                num_trails += 1
+                rp.trumps += 1
 
+        self._current_age -= 1
+        new_rp = MORankingProperties(num_trails, num_trumps, self._current_age,
+                                     new_fitness, new_parameters)
+        bisect.insort_left(self, new_rp)
 
-    def multi_objective_add(self, new_parameter_batch, new_fitness):
-        if trumps(new_fitness, self._fitnesses[-1]):
-            return
-
-        trumps = 0
-        trails = 0
-        for i, old_fitness in enumerate(self._fitnesses):
-            if trumps(new_fitness, old_fitness):
-                trumps += 1
-                self._trails[i] += 1 
-                self.calculate_score_for_index(i)
-            elif trumps(old_fitness, new_fitness):
-                trails += 1
-                self._trumps[i] += 1
-                self.calculate_score_for_index(i)
-
-        new_score = calculate_score(trumps, trails, self.max_length)
-        new_position = bisect.bisect_left(self._scores, new_score)
-        self._parameter_batches.insert(new_position, new_parameter_batch)
-        self._fitnesses.insert(new_position, new_fitness)
-        self._scores.insert(new_position, new_score)
-        self._trumps.insert(new_position, trumps)
-        self._trails.insert(new_position, trails)
-
-        if(len(self) >= self.max_length):
-            dead_parameter_batch = self._parameter_batches.pop()
-            dead_fitness = self._fitnesses.pop()
-            self._scores.pop()
-            self._trumps.pop()
-            dead_trails = self._trails.pop()
+        if(len(self) > self.max_length):
+            self.pop()
         
+    def pop(self):
+        dead_rp = list.pop(self)
         running_trails = 0
-        for i, kept_fitness in enumerate(self._fitnesses):
-            if trumps(kept_fitness, dead_fitness):
+        for i, good_rp in enumerate(self):
+            if trumps(good_rp.fitness, dead_rp.fitness):
                 running_trails += 1
-                self._trumps[i] -= 1
-                self.calculate_score_for_index(i)
+                good_rp.trumps -= 1
 
-            if running_trails == dead_trails:
+            if running_trails == dead_rp.trails:
                 break
 
-    def __getitem__(self, index):
-        return self._parameter_batches[index]
-    
-    def __getslice__(self, begin, end):
-        return self._parameter_batches.__getslice__(begin, end)
-
-    def __len__(self):
-        return len(self._parameter_batches)
-
-    def calculate_score_for_index(self, index):
-        self._score[index] = calculate_score(self._trumps[index],
-                                             self._trails[index],
-                                             self.max_length)
-
-    def __iter__(self):
-        return iter(self._parameter_batches)
+        return dead_rp
 
 
 def trumps(fitness1, fitness2):
-    return all(f2 < f1 for f1, f2 in izip(fitness1, fitness2))
+    return all(f1 > f2 for f1, f2 in izip(fitness1, fitness2))
 
-def calculate_score(trails, trumps, max_length):
-    return -max_length*trails + trumps
+def trails(fitness1, fitness2):
+    return all(f1 < f2 for f1, f2 in izip(fitness1, fitness2))

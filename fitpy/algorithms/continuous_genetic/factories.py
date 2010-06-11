@@ -10,14 +10,14 @@ from fitpy.utils import meshes, iterables
 
 __all__ = ['make_algorithm']
 
-def make_algorithm(fit_func, parameter_constraint_list, ecs,
+def make_algorithm(cost_func, parameter_constraint_list, ecs,
                    population=None, **kwargs):
     reproduction_object = make_default_reproduction(parameter_constraint_list,
                                                     **kwargs)
     if population is None:
         test_individual = reproduction_object.random_set(1)
         test_individual = test_individual[0]
-        test_fitness = fit_func(test_individual)
+        test_fitness = cost_func(test_individual)
 
         if iterables.isiterable(test_fitness):
             population = MultiObjectiveParameterQueue(**kwargs)
@@ -26,7 +26,7 @@ def make_algorithm(fit_func, parameter_constraint_list, ecs,
 
         population.add(test_individual, test_fitness)
 
-    return strategies.GeneticAlgorithm(fit_func, population, 
+    return strategies.GeneticAlgorithm(cost_func, population, 
                                        reproduction_object, ecs, **kwargs)
 
 def make_default_reproduction(parameter_constraint_list, 

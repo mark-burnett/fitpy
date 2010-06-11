@@ -84,7 +84,7 @@ def residual_fit(target_function, x_values, y_values,
     # -------------------------------------------------------------------
     # Build fitness function/evaluation object
     logger.debug('Building fitness function.')
-    fit_func = factories.make_residual_fitness_function(target_function,
+    cost_func = factories.make_residual_cost_function(target_function,
                                                         x_values, y_values,
                                                         y_stds, residual_name,
                                                         **kwargs)
@@ -97,7 +97,7 @@ def residual_fit(target_function, x_values, y_values,
                                                fit_tolerance, **kwargs)
     # Build algorithm object
     logger.debug('Building algorithm object.')
-    fitting_algorithm = factories.make_algorithm(fit_func,
+    fitting_algorithm = factories.make_algorithm(cost_func,
                                                  parameter_constraint_list,
                                                  ecs, algorithm_name,
                                                  **kwargs)

@@ -1,6 +1,8 @@
+import inspect
 import itertools
 
 from fitpy.utils import iterables
+from . import cost_function_wrapper
 
 def count_crossings(yvalues1, yvalues2):
     """
@@ -19,3 +21,8 @@ def count_crossings(yvalues1, yvalues2):
             num_crossings += 1
 
     return num_crossings
+
+def get_parameter_names(function):
+    if isinstance(function, cost_function_wrapper.CostFunctionWrapper):
+        return function.parameter_names
+    return inspect.getargspec(function).args

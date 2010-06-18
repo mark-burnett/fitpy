@@ -28,7 +28,7 @@ class GeneticAlgorithm(object):
 
         logger.debug('Evaluating initial generation.')
         for parameters in initial_parameters_set:
-            fitness = self.fitness_func(parameters)
+            fitness = self.fitness_func(*parameters)
             evaluation_cache[parameters] = fitness
             self.population.add(parameters, fitness)
             num_evaluations += 1
@@ -44,7 +44,7 @@ class GeneticAlgorithm(object):
             # Generate children
             child = self.reproduce.generate_child(self.population,
                                                   evaluation_cache)
-            fitness = self.fitness_func(child)
+            fitness = self.fitness_func(*child)
             evaluation_cache[child] = fitness
             self.population.add(child, fitness)
 

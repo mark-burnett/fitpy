@@ -17,7 +17,7 @@ def make_algorithm(cost_func, parameter_constraint_list, ecs,
     if population is None:
         test_individual = reproduction_object.random_set(1)
         test_individual = test_individual[0]
-        test_fitness = cost_func(test_individual)
+        test_fitness = cost_func(*test_individual)
 
         if iterables.isiterable(test_fitness):
             population = MultiObjectiveParameterQueue(**kwargs)

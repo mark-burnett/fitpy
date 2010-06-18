@@ -9,8 +9,9 @@ def guess_initial_parameter_constraints():
 
 def format_as_list(input, keys):
     if input:
+        print 'got input'
         if isinstance(input, dict):
-            log.debug('Formatting list as dictionary.')
+            log.debug('Formatting dictionary as list.')
             output = []
             for key in keys:
                 try:

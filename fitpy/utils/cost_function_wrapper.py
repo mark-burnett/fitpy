@@ -5,5 +5,5 @@ class CostFunctionWrapper(object):
         self.function = function
         self.parameter_names = parameter_names
 
-    def __call__(self, *arguments):
-        return self.function(*arguments)
+    def __call__(self, *args):
+        return self.function(*args)

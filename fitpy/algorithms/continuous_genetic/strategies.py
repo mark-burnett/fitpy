@@ -8,8 +8,8 @@ logger = logutils.getLogger(__file__)
 __all__ = ['GeneticAlgorithm']
 
 class GeneticAlgorithm(object):
-    def __init__(self, fitness_func, population, reproduce, end, **kwargs):
-        self.fitness_func    = fitness_func
+    def __init__(self, cost_func, population, reproduce, end, **kwargs):
+        self.cost_func    = cost_func
         self.population      = population
         self.reproduce       = reproduce
         self.end             = end
@@ -22,19 +22,19 @@ class GeneticAlgorithm(object):
 
         evaluation_cache = EvaluationCache()
         for p in self.population:
-            evaluation_cache[p.parameters] = p.fitness
+            evaluation_cache[p.parameters] = p.cost
 
         num_evaluations = len(evaluation_cache)
 
         logger.debug('Evaluating initial generation.')
         for parameters in initial_parameters_set:
-            fitness = self.fitness_func(*parameters)
-            evaluation_cache[parameters] = fitness
-            self.population.add(parameters, fitness)
+            cost = self.cost_func(*parameters)
+            evaluation_cache[parameters] = cost
+            self.population.add(parameters, cost)
             num_evaluations += 1
 
         best_parameters = self.population[0].parameters
-        best_fitness    = self.population[0].fitness
+        best_cost    = self.population[0].cost
 
         for e in self.end:
             e.reset()
@@ -44,17 +44,17 @@ class GeneticAlgorithm(object):
             # Generate children
             child = self.reproduce.generate_child(self.population,
                                                   evaluation_cache)
-            fitness = self.fitness_func(*child)
-            evaluation_cache[child] = fitness
-            self.population.add(child, fitness)
+            cost = self.cost_func(*child)
+            evaluation_cache[child] = cost
+            self.population.add(child, cost)
 
             # Progress tracking
             best_parameters = self.population[0].parameters
-            best_fitness    = self.population[0].fitness
+            best_cost    = self.population[0].cost
             num_evaluations += 1
             ec_locals = locals()
 
         # Return
         return {'evaluation_cache': evaluation_cache,
                 'best_parameters':  best_parameters,
-                'best_fitness':     best_fitness}
+                'best_cost':        best_cost}

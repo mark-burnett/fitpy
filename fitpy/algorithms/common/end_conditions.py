@@ -42,21 +42,21 @@ class MaxEvaluations(Counter):
         return variables['num_evaluations'] >= self.max_count
 
 
-class FitTolerance(EndCondition):
+class MinimumCost(EndCondition):
     '''
     End condition to specify a minimum residual or cost function.
     '''
-    def __init__(self, tolerance):
-        self.tolerance = tolerance
+    def __init__(self, target_cost):
+        self.target_cost = target_cost
 
     def check(self, variables):
-        return  variables['best_fitness'] < self.tolerance
+        return  variables['best_cost'] < self.target_cost
 
     def reset(self):
         pass
 
     def __str__(self):
-        return "%s: %f" % (type(self).__name__, self.tolerance)
+        return "%s: %f" % (type(self).__name__, self.target_cost)
     
 
 class MaxRuntime(EndCondition):
@@ -94,17 +94,17 @@ class StoppedImproving(EndCondition):
     def __init__(self, static_generations):
         self.static_generations = static_generations
         self.unchanged = 0
-        self.last_fitness = None
+        self.last_cost = None
         self.finished = False
 
     def check(self, variables):
-        best_fitness = variables['best_fitness']
+        best_cost = variables['best_cost']
         if not self.finished:
-            if best_fitness == self.last_fitness:
+            if best_cost == self.last_cost:
                 self.unchanged += 1
             else:
                 self.unchanged = 0
-                self.last_fitness = best_fitness
+                self.last_cost = best_cost
 
         if self.unchanged >= self.static_generations:
             self.finished = True
@@ -113,7 +113,7 @@ class StoppedImproving(EndCondition):
         return False
 
     def reset(self):
-        self.last_fitness = None
+        self.last_cost = None
         self.unchanged = 0
         self.finished = False
 

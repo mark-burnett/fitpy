@@ -9,10 +9,10 @@ except ImportError:
 
 class EvaluationCache(OrderedDict):
     """
-        Base class to keep track of all fitness function evaluations and
+        Base class to keep track of all cost function evaluations and
     the parameter set used.
     """
-    def get_fitness(self, i):
+    def get_cost(self, i):
         return self[i]
     
     @property

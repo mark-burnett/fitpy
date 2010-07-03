@@ -8,7 +8,7 @@ from .utils import logutils
 from .utils.parameters import format_as_list
 from .algorithms import factories
 
-from .settings import *
+import default_settings as ds
 
 from .optimize import optimize
 
@@ -18,15 +18,15 @@ logger = logutils.getLogger(__file__)
 
 # XXX rename target_function to model_function (don't forget docs)
 def residual_fit(target_function, x_values, y_values,
-                 y_stds=None,
-                 residual_name=DEFAULT_RESIDUAL_NAME,
+                 y_errors=None,
+                 residual_name=ds.RESIDUAL_NAME,
                  parameter_constraints=None,
                  initial_guess=None,
-                 max_evaluations=DEFAULT_MAX_EVALUATIONS,
-                 max_runtime=DEFAULT_MAX_RUNTIME,
-                 fit_tolerance=None,
+                 max_evaluations=ds.MAX_EVALUATIONS,
+                 max_runtime=ds.MAX_RUNTIME,
+                 target_residual=None,
                  verbosity=None,
-                 algorithm_name=DEFAULT_ALGORITHM_NAME,
+                 algorithm_name=ds.ALGORITHM_NAME,
                  **kwargs):
     '''
         Convenience function that finds a reasonable fit to x, y data using
@@ -52,11 +52,10 @@ def residual_fit(target_function, x_values, y_values,
         logger.critical('length of x_values and y_values must be equal.')
         raise ValueError('Length of x_values and y_values not equal.')
 
-    # Build fitness function/evaluation object
-    logger.debug('Building fitness function.')
+    logger.debug('Building cost function.')
     cost_func = factories.make_residual_cost_function(target_function,
                                                       x_values, y_values,
-                                                      y_stds, residual_name,
+                                                      y_errors, residual_name,
                                                       **kwargs)
 
     result = optimize(cost_func,
@@ -64,7 +63,7 @@ def residual_fit(target_function, x_values, y_values,
                       initial_guess=initial_guess,
                       max_evaluations=max_evaluations,
                       max_runtime=max_runtime,
-                      fit_tolerance=fit_tolerance,
+                      target_cost=target_residual,
                       verbosity=None,
                       algorithm_name=algorithm_name,
                       **kwargs)

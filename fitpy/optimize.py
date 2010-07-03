@@ -9,18 +9,18 @@ from .utils.parameters import format_as_list
 from .utils import funcutils
 from .algorithms import factories
 
-from .settings import *
+import default_settings as ds
 
 logger = logutils.getLogger(__file__)
 
 def optimize(cost_function,
              parameter_constraints=None,
              initial_guess=None,
-             max_evaluations=DEFAULT_MAX_EVALUATIONS,
-             max_runtime=DEFAULT_MAX_RUNTIME,
-             fit_tolerance=None,
+             max_evaluations=ds.MAX_EVALUATIONS,
+             max_runtime=ds.MAX_RUNTIME,
+             target_cost=None,
              verbosity=None,
-             algorithm_name=DEFAULT_ALGORITHM_NAME,
+             algorithm_name=ds.ALGORITHM_NAME,
              **kwargs):
     '''
         Convenience function that finds a reasonable fit to x, y data using
@@ -77,11 +77,8 @@ def optimize(cost_function,
     # -------------------------------------------------------------------
     # Build end_conditions objects
     logger.debug('Building end conditions.')
-# XXX do something special with tolerance stuff.
-#    if fit_tolerance is None:
-#        fit_tolerance = float(len(x_values))/2
     ecs = factories.make_simple_end_conditions(max_evaluations, max_runtime,
-                                               fit_tolerance, **kwargs)
+                                               target_cost, **kwargs)
     # Build algorithm object
     logger.debug('Building algorithm object.')
     fitting_algorithm = factories.make_algorithm(cost_function,
@@ -95,7 +92,7 @@ def optimize(cost_function,
     result = fitting_algorithm.run(initial_guess_list, **kwargs)
 
     best_parameters = result['best_parameters']
-    logger.info('Fit complete: best residual %f.' % 
+    logger.info('Fit complete: best cost %f.' % 
                 result['evaluation_cache'][best_parameters])
     for name, value in itertools.izip(parameter_names, best_parameters):
         logger.info('%s = % f' % (name, value))
